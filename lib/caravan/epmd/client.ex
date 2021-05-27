@@ -7,6 +7,8 @@ defmodule Caravan.Epmd.Client do
   out to the `epmd` daemon and having it assign us one.
   """
   alias Caravan.Epmd
+  require Logger
+
   # erl_distribution wants us to start a worker process.  We don't
   # need one, though.
   def start_link do
@@ -33,13 +35,22 @@ defmodule Caravan.Epmd.Client do
     port = Epmd.dist_port(name)
     # The distribution protocol version number has been 5 ever since
     # Erlang/OTP R6.
+    if Application.get_env(:caravan, :debug, false) do
+      Logger.debug("~~ called port_please with name: #{inspect(name)}")
+      Logger.debug("~~ port_please returned port: #{inspect(port)}")
+    end
     version = 5
     {:port, port, version}
   end
 
   # added for OTP-21
   def address_please(_name, host, _address_family) do
-    :inet.getaddr(host, :inet)
+    address = :inet.getaddr(host, :inet)
+    if Application.get_env(:caravan, :debug, false) do
+      Logger.debug("~~ called address_please with host: #{inspect(host)}")
+      Logger.debug("~~ address_please returned address: #{inspect(address)}")
+    end
+    address
   end
 
   def names(_hostname) do
